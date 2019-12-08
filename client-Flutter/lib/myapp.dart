@@ -14,14 +14,17 @@ Implement a socket connection interface for chats chatting screens. Cause: avoid
  */
 
 class MyApp extends StatelessWidget {
-  static IOWebSocketChannel channel; //TODO make unregisters on onPause!!!!
+  static IOWebSocketChannel channel =
+      IOWebSocketChannel.connect('ws://172.28.19.38:1337'); //TODO IMPROVE IT
   static int userId = 0;
+
+  MyApp() {
+    channel.stream.asBroadcastStream();
+    debugPrint("Stream is : " + channel.stream.isBroadcast.toString());
+  }
 
   final ui = MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        channel = IOWebSocketChannel.connect(
-            'ws://172.28.19.38:1337'); //TODO IMPROVE IT
-            
         switch (settings.name) {
           case ADatas.homeRoute:
             return MaterialPageRoute(builder: (_) => DebugPublisherScreen());
