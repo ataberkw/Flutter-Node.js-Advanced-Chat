@@ -1,9 +1,16 @@
 {
-    "name": "node-chat",
-    "version": "0.0.1",
-    "description": "first node chat app",
-    "dependencies": {
-        "express": "^4.17.1",
-        "socket.io": "^2.3.0"
-    }
+  "name": "examplechat",
+  "version": "1.0.0",
+  "description": "test",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql": "^2.17.1",
+    "websocket": "^1.0.30"
+  }
 }

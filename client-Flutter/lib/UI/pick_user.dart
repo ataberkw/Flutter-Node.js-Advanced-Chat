@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:deneme/datas.dart';
 import 'package:deneme/myapp.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,7 +8,7 @@ import 'package:web_socket_channel/io.dart';
 
 class PickUserScreen extends StatefulWidget {
   var arguments;
-
+  static const name = ADatas.pickUser;
   PickUserScreen(this.arguments);
 
   PickUserState createState() => PickUserState();
@@ -23,12 +24,11 @@ class PickUserState extends State<PickUserScreen> {
   }
 
   void initChannel() {
-    MyApp.channel = IOWebSocketChannel.connect('ws://172.28.19.38:1337');
   }
 
   void sendToServer(String action, var data) {
     data['action'] = action;
-    MyApp.channel.sink.add(json.encode(data));
+    MyApp.channels[PickUserScreen.name].sink.add(json.encode(data));
   }
 
   var addedUserIds = [];
@@ -86,7 +86,7 @@ class PickUserState extends State<PickUserScreen> {
                       ],
                     ),
                     StreamBuilder(
-                      stream: MyApp.channel.stream,
+                      stream: MyApp.channels[PickUserScreen.name].stream,
                       builder: (ctx, AsyncSnapshot<Object> snapshot) {
                         if (snapshot.hasData) {
                           var data = snapshot.data;
@@ -200,6 +200,12 @@ class PickUserState extends State<PickUserScreen> {
         }
     }
     return content;
+  }
+
+@override
+  void dispose() {
+    MyApp.delChannel(PickUserScreen.name);
+    super.dispose();
   }
 }
 

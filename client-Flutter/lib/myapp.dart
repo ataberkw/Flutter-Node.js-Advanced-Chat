@@ -1,7 +1,7 @@
 import 'package:deneme/UI/chats.dart';
 import 'package:deneme/UI/chatting.dart';
 import 'package:deneme/UI/debug_home.dart';
-import 'package:deneme/UI/debug_publisher_screen.dart';
+import 'package:deneme/UI/intro.dart';
 import 'package:deneme/UI/pick_user.dart';
 import 'package:deneme/datas.dart';
 import 'package:flutter/material.dart';
@@ -14,34 +14,64 @@ Implement a socket connection interface for chats chatting screens. Cause: avoid
  */
 
 class MyApp extends StatelessWidget {
-  static IOWebSocketChannel channel =
-      IOWebSocketChannel.connect('ws://172.28.19.38:1337'); //TODO IMPROVE IT
+  static Map<String, IOWebSocketChannel> channels = Map();
+  static var authorizedUser = {'token': "blahblah", 'id': 4};
   static int userId = 0;
 
   MyApp() {
-    channel.stream.asBroadcastStream();
-    debugPrint("Stream is : " + channel.stream.isBroadcast.toString());
+    addChannel(IntroScreen.name); //TODO improve it
+  }
+
+  static authorizeUser(userId) {
+    addChannel('authorization').sink.add({'action': 'LOGIN', 'userId': userId});
+  }
+
+  static isUserAuthorized() {
+    return userId != 0;
   }
 
   final ui = MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
-          case ADatas.homeRoute:
-            return MaterialPageRoute(builder: (_) => DebugPublisherScreen());
-          case ADatas.chatting:
-            return MaterialPageRoute(
-                builder: (_) => ChattingScreen(settings.arguments));
-          case ADatas.chats:
-            return MaterialPageRoute(
-                builder: (_) => ChatsScreen(settings.arguments));
-          case ADatas.pickUser:
-            return MaterialPageRoute(
-                builder: (_) => PickUserScreen(settings.arguments));
+          case DebugHome.name:
+            {
+              return MaterialPageRoute(builder: (_) => DebugHome());
+            }
+          case ChattingScreen.name:
+            {
+              addChannel(settings.name);
+              return MaterialPageRoute(
+                  builder: (_) => ChattingScreen(settings.arguments));
+            }
+          case ChatsScreen.name:
+            {
+              addChannel(settings.name);
+              return MaterialPageRoute(
+                  builder: (_) => ChatsScreen(settings.arguments));
+            }
+          case PickUserScreen.name:
+            {
+              addChannel(settings.name);
+              return MaterialPageRoute(
+                  builder: (_) => PickUserScreen(settings.arguments));
+            }
           default:
-            return MaterialPageRoute(builder: (_) => DebugPublisherScreen());
+            {
+              addChannel(settings.name);
+              return MaterialPageRoute(builder: (_) => IntroScreen());
+            }
         }
       },
-      home: DebugHome());
+      home: IntroScreen());
+
+  static IOWebSocketChannel addChannel(routeName) {
+    return channels[routeName] =
+        IOWebSocketChannel.connect('ws://172.28.16.224:1337');
+  }
+
+  static delChannel(routeName) {
+    channels.removeWhere((name, channel) => name == routeName);
+  }
 
   @override
   Widget build(BuildContext context) {

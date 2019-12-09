@@ -1,26 +1,30 @@
 import 'dart:convert';
 
+import 'package:deneme/UI/chatting.dart';
 import 'package:deneme/UI/pick_user.dart';
 import 'package:deneme/datas.dart';
 import 'package:deneme/myapp.dart';
+import 'package:deneme/stream_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 
 class ChatsScreen extends StatefulWidget {
   var arguments;
+  static const name = ADatas.chats;
 
   ChatsScreen(this.arguments);
 
   createState() => ChatsScreenState();
 }
 
-class ChatsScreenState extends State<ChatsScreen> {
+class ChatsScreenState extends State<ChatsScreen> with RouteHelper{
   String userName = "";
 
   var textEditingController = TextEditingController();
 
   @override
   void initState() {
+    getRouteName();
     userName = widget.arguments['userName'];
     initChannel();
     super.initState();
@@ -32,11 +36,14 @@ class ChatsScreenState extends State<ChatsScreen> {
 
   void sendToServer(String action, var data) {
     data['action'] = action;
-    MyApp.channel.sink.add(json.encode(data));
+    MyApp.channels[ChatsScreen.name].sink.add(json.encode(data));
   }
 
   @override
   Widget build(BuildContext context) {
+    if(widget is ChatsScreen){
+      (widget.runtimeType.name);
+    }
     return Scaffold(
       appBar: AppBar(title: Text("Chats")),
       body: Padding(
@@ -44,12 +51,13 @@ class ChatsScreenState extends State<ChatsScreen> {
         child: Stack(
           children: <Widget>[
             StreamBuilder<Object>(
-                stream: MyApp.channel.stream,
+                stream: MyApp.channels[ChatsScreen.name].stream,
                 builder: (context, AsyncSnapshot snapshot) {
                   var data = snapshot.data;
                   if (snapshot.hasData) {
                     handleStreamRespond(json.decode(data));
                   }
+                  
                   return Column(
                     children: [
                       Text("Displaying $userName's chats"),
@@ -96,5 +104,11 @@ class ChatsScreenState extends State<ChatsScreen> {
       default:
         break;
     }
+  }
+
+  @override
+  void dispose() {
+    MyApp.delChannel(ChatsScreen.name);
+    super.dispose();
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:deneme/chat_controller.dart';
+import 'package:deneme/datas.dart';
 import 'package:deneme/myapp.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ChattingScreen extends StatefulWidget {
   var arguments;
+  static const name = ADatas.chatting;
   IOWebSocketChannel channel;
 
   ChattingScreen(this.arguments, {this.channel});
@@ -53,7 +55,7 @@ class ChattingScreenState extends State<ChattingScreen>
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: MyApp.channel.stream,
+        stream: MyApp.channels[ChattingScreen.name].stream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           var data = snapshot.data;
           if (data != null) {
@@ -122,7 +124,8 @@ class ChattingScreenState extends State<ChattingScreen>
 
   void sendToServer(String action, var data) {
     data['action'] = action;
-    MyApp.channel.sink.add(json.encode(data));
+    MyApp.channels[ChattingScreen.name].sink.add(json.encode(data));
+    debugPrint(MyApp.channels[ChattingScreen.name].stream.toString());
   }
 
   Widget getMessageItem(Message msg) {
@@ -148,6 +151,7 @@ class ChattingScreenState extends State<ChattingScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    MyApp.delChannel(ChattingScreen.name);
     super.dispose();
   }
 
@@ -155,8 +159,7 @@ class ChattingScreenState extends State<ChattingScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.paused:
-        {
-        }
+        {}
         break;
       case AppLifecycleState.resumed:
         {}
