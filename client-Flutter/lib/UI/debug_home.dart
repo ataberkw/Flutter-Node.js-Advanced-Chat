@@ -2,7 +2,11 @@ import 'package:deneme/datas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class DebugHome extends StatelessWidget {
+class DebugHomeScreen extends StatefulWidget {
+  createState() => DebugHome();
+}
+
+class DebugHome extends State<DebugHomeScreen> {
   static const name = ADatas.homeRoute;
   @override
   Widget build(BuildContext context) {

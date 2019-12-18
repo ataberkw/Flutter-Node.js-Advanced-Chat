@@ -24,7 +24,6 @@ class ChatsScreenState extends State<ChatsScreen> with RouteHelper{
 
   @override
   void initState() {
-    getRouteName();
     userName = widget.arguments['userName'];
     initChannel();
     super.initState();
@@ -41,9 +40,6 @@ class ChatsScreenState extends State<ChatsScreen> with RouteHelper{
 
   @override
   Widget build(BuildContext context) {
-    if(widget is ChatsScreen){
-      (widget.runtimeType.name);
-    }
     return Scaffold(
       appBar: AppBar(title: Text("Chats")),
       body: Padding(

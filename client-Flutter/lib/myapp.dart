@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case DebugHome.name:
             {
-              return MaterialPageRoute(builder: (_) => DebugHome());
+              return MaterialPageRoute(builder: (_) => DebugHomeScreen());
             }
           case ChattingScreen.name:
             {
@@ -70,6 +70,7 @@ class MyApp extends StatelessWidget {
   }
 
   static delChannel(routeName) {
+    channels[routeName].sink.close(0, "Closed by the client");
     channels.removeWhere((name, channel) => name == routeName);
   }
 

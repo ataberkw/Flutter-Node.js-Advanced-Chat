@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:deneme/UI/debug_home.dart';
 import 'package:deneme/datas.dart';
 import 'package:deneme/myapp.dart';
@@ -13,45 +16,75 @@ class IntroScreen extends StatefulWidget {
 }
 
 class IntroScreenState extends State<IntroScreen> {
+  StreamSubscription streamSubscription;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _test(context));
+  }
+
+  void _test(BuildContext ctx) {
+    debugPrint("true");
+  }
+
   @override
   Widget build(BuildContext context) {
     var textEditingController = TextEditingController();
-        return Scaffold(body: Container(
-          color: Colors.red,
-          child: Center(
-              child: Stack(
+    MyApp.channels[IntroScreen.name].stream.listen((data) {
+      if (data) {
+        debugPrint(data.toString());
+        /*var data = json.decode(snapshot.data);
+                debugPrint(data.toString());
+                if (data['action'] == 'AUTHORIZATION') {
+                  var userId = data['userId'];
+                  MyApp.userId = userId;
+                  // Navigator.pushNamed(context, DebugHome.name);
+                  //Navigator.popAndPushNamed(context, DebugHome.name);
+                  debugPrint('its authorized');
+                }*/
+      }
+    });
+    return Scaffold(
+        body: Container(
+      color: Colors.red,
+      child: Center(
+          child: Stack(
+        children: <Widget>[
+          Icon(Icons.access_time),
+          Row(
             children: <Widget>[
-              Icon(Icons.access_time),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(controller: textEditingController,),
+              Expanded(
+                child: TextField(
+                  controller: textEditingController,
+                ),
               ),
               FlatButton(
                 child: Text("Login"),
                 onPressed: () {
                   var text = textEditingController.text;
-                  if(text.length >= 3){
-                    MyApp.channels[IntroScreen.name].sink.add({'action':''});
-                  }else{
-                    Fluttertoast.showToast(msg: 'Please enter minimum 3 characters.');
+                  if (text.length >= 3) {
+                    var authorizationRequest = {
+                      'action': 'AUTHORIZATION',
+                      'userName': text
+                    };
+                    MyApp.channels[IntroScreen.name].sink
+                        .add(json.encode(authorizationRequest));
+                    debugPrint('Authorization request sent as $text');
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: 'Please enter minimum 3 characters.');
                   }
                 },
               )
             ],
           ),
-          StreamBuilder(
+          /*StreamBuilder(
             stream: MyApp.channels[IntroScreen.name].stream,
             builder: (ctx, snapshot) {
-              var data = snapshot.data;
-              if (data != null) {
-                if(data['action'] == ''){
-
-                }
-              }
+              
               return Text('yaay');
             },
-          )
+          )*/
         ],
       )),
     ));

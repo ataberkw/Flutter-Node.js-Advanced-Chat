@@ -144,7 +144,7 @@ class PickUserState extends State<PickUserScreen> {
                                   shrinkWrap: true,
                                   itemCount: users.length,
                                   itemBuilder: (ctx, index) {
-                                    debugPrint('its reloooo');
+                                    debugPrint('rell');
                                     var user = users[index];
                                     var userAdded =
                                         addedUserIds.contains(user['id']);

@@ -26,32 +26,32 @@ var chat = {
         {
             "messageId": "15",
             "sender": "Ata",
-            "content": "selamm"
+            "content": "selam"
         },
         {
             "messageId": "16",
             "sender": "Ata",
-            "content": "selamm"
+            "content": "selam"
         },
         {
             "messageId": "17",
             "sender": "Hasan",
-            "content": "naberr"
+            "content": "naber"
         },
         {
             "messageId": "18",
             "sender": "Ata",
-            "content": "iyi valla"
+            "content": "iyi senden naber"
         },
         {
             "messageId": "19",
             "sender": "Ata",
-            "content": "sendene naber"
+            "content": "fena değil"
         },
         {
             "messageId": "20",
             "sender": "Hasan",
-            "content": "bendene de iyi"
+            "content": "güzel!"
         },
     ]
 }
@@ -77,8 +77,8 @@ wsServer.on('request', function (request) {
         if (message.type == 'utf8') {
             var data = message.utf8Data
             var jsonData = JSON.parse(data)
-            if (jsonData.action == "CONNECT") {
-                connectUser(connection, jsonData)
+            if (jsonData.action == "AUTHORIZATION") {
+                authorizeUser(connection, jsonData)
             } else {
                 handleData(connection, jsonData)
             }
@@ -92,29 +92,38 @@ wsServer.on('request', function (request) {
     })
 })
 
-async function connectUser(connection, jsonData) {
+async function authorizeUser(connection, jsonData) {
     var userName = jsonData.userName
     connection.userName = userName
     await conn.query("SELECT * FROM `users` WHERE `name` = '" + userName + "'", async (err, rows) => {
         if (err) {
             console.log("DB query error: " + err)
+            throwErrorToConnection(connection, err);
             return;
         }
         console.log(rows.length)
         if (rows.length == 0) {
             await conn.query("INSERT INTO `users`(`name`) VALUES ('" + userName + "')", (err) => {
-
+                console.log("DB query error: " + err)
+                throwErrorToConnection(connection, err);
+                return;
             });
         }
         await conn.query("SELECT `id` FROM `users` WHERE `name`= '" + userName + "'", (err, rows) => {
             userId = rows[0].id
             connection.userId = userId
         })
-        var respond = { action: "CONNECTED" }
+        var respond = { action: "AUTHORIZATION", userId: connection.userId }
         connection.sendUTF(JSON.stringify(respond));
+        console.log("User '" + userName + ":" + connection.userId + " ' logged in.");
     })
     connections[userName] = connection
 }
+
+function throwErrorToConnection(connection, err) {
+    connection.sendUTF(JSON.stringify({ action: 'ERROR', error: err }));
+}
+
 function handleData(connection, jsonData) {
     switch (jsonData.action) {
         case "GET_CHAT":
@@ -138,7 +147,7 @@ function handleData(connection, jsonData) {
                         console.log(err);
                     }
                     console.log("SELECT * FROM `users` WHERE `name` LIKE '%" + searchName + "%'");
-                    connection.sendUTF(JSON.stringify({users:rows, action: 'GET_USERS'}))
+                    connection.sendUTF(JSON.stringify({ users: rows, action: 'GET_USERS' }))
                     console.log("rows");
                 });
             break;
